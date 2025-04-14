@@ -1,0 +1,45 @@
+{% extends 'tests_app/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">Тест: {{ test.name }}</h1>
+    
+    {% if test.description %}
+        <div class="alert alert-info">
+            <strong>Описание:</strong> {{ test.description }}
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header">Ваше имя</div>
+            <div class="card-body">
+                {{ user_form.as_p }}
+            </div>
+        </div>
+
+        {% for question in questions %}
+            <div class="card mb-3">
+                <div class="card-header">Вопрос {{ forloop.counter }}</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ question.question_text }}</h5>
+
+                    <div class="list-group">
+                        {% for answer in question.answer_set.all %}
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1"
+                                       type="radio"
+                                       name="question_{{ question.id }}"
+                                       value="{{ answer.id }}">
+                                {{ answer.answer_text }}
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary btn-lg">Завершить тест</button>
+    </form>
+{% endblock %}

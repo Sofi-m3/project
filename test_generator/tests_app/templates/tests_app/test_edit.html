@@ -1,0 +1,101 @@
+{% extends 'tests_app/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">Редактирование теста: {{ test.name }}</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">Основная информация</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {{ test_form.as_p }}
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Вопросы</div>
+        <div class="card-body">
+            {% if test.question_set.all %}
+                <div class="list-group mb-4">
+                    {% for question in test.question_set.all %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>{{ question.question_text }}</h5>
+                                <div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addAnswerModal{{ question.id }}">Добавить ответ</a>
+                                </div>
+                            </div>
+
+                            {% if question.answer_set.all %}
+                                <ul class="mt-2">
+                                    {% for answer in question.answer_set.all %}
+                                        <li>
+                                            {{ answer.answer_text }}
+                                            {% if answer.is_correct %}
+                                                <span class="badge bg-success">Правильный</span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted mt-2">Нет вариантов ответа</p>
+                            {% endif %}
+
+                            <!-- Add Answer Modal -->
+                            <div class="modal fade" id="addAnswerModal{{ question.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Добавить ответ</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="post" action="{% url 'answer_add' question.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                {{ answer_form.as_p }}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                <button type="submit" class="btn btn-primary">Добавить</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Нет вопросов</p>
+            {% endif %}
+
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">Добавить вопрос</button>
+
+            <!-- Add Question Modal -->
+            <div class="modal fade" id="addQuestionModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Добавить вопрос</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form method="post" action="{% url 'question_add' test.id %}">
+                            <div class="modal-body">
+                                {% csrf_token %}
+                                {{ question_form.as_p }}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Добавить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'test_list' %}" class="btn btn-secondary">Назад к списку</a>
+{% endblock %}
